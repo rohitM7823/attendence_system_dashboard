@@ -222,7 +222,7 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
                           child: Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Text(device.deviceId),
+                            child: Text(device.name ?? device.model ?? ''),
                           ),
                         );
                       }).toList(),

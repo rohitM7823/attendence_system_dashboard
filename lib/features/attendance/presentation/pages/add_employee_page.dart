@@ -54,7 +54,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
             items: MockData.devices.map((device) {
               return DropdownMenuItem<Device>(
                 value: device,
-                child: Text(device.deviceId),
+                child: Text(device.name ?? device.model ?? ''),
               );
             }).toList(),
             onChanged: (value) {

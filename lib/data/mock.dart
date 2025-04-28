@@ -5,11 +5,11 @@ import '../models/employee.dart';
 
 class MockData {
   static List<Device> devices = [
-    Device(deviceId: 'D001', deviceType: 'Phone', isApproved: true),
-    Device(deviceId: 'D002', deviceType: 'Tablet', isApproved: true),
-    Device(deviceId: 'D003', deviceType: 'Laptop', isApproved: true),
-    Device(deviceId: 'D004', deviceType: 'Phone', isApproved: null),
-    Device(deviceId: 'D005', deviceType: 'Phone', isApproved: null),
+    Device(deviceId: 'D001', platform: 'Android', status: 'Approved'),
+    Device(deviceId: 'D002', platform: 'iOS', status: 'Approved'),
+    Device(deviceId: 'D003', platform: 'web', status: 'Rejected'),
+    Device(deviceId: 'D004', platform: 'Android', status: 'Approved'),
+    Device(deviceId: 'D005', platform: 'iOS', status: 'Approved'),
   ];
   static List<Employee> employees = [
     Employee(empId: 'E001', name: 'John Doe', status: 'Not Clocked In', device: devices.first),
@@ -19,7 +19,7 @@ class MockData {
   static List<Attendance> attendances = [];
 
   static void registerDevice(String deviceId) {
-    devices.add(Device(deviceId: deviceId, deviceType: 'Phone'));
+    devices.add(Device(deviceId: 'D001', platform: 'Android', status: 'Approved'),);
   }
 
   static void addEmployee(Employee employee) {
