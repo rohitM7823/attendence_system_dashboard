@@ -1,71 +1,107 @@
+import 'package:attendence_system_dashboard/features/attendance/presentation/pages/attendence_report.dart';
+import 'package:attendence_system_dashboard/features/attendance/presentation/pages/employee_management_page.dart';
+import 'package:attendence_system_dashboard/features/attendance/presentation/pages/force_attendence.dart';
+import 'package:attendence_system_dashboard/features/attendance/presentation/pages/overview_page.dart';
+import 'package:attendence_system_dashboard/features/attendance/presentation/pages/register_device.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(AdminPanelApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
+class AdminPanelApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Admin Panel',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: AdminHomePage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
+class AdminHomePage extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _AdminHomePageState createState() => _AdminHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _AdminHomePageState extends State<AdminHomePage> {
+  int _selectedIndex = 0;
 
-  void _incrementCounter() {
+  final List<Widget> _pages = [
+    RegisterDevicePage(),
+    EmployeeManagementPage(),
+    AttendanceReportPage(),
+    ForceAttendancePage(),
+    OverviewPage()
+  ];
+
+  final List<String> _titles = [
+    'Register Device',
+    'Manage Employees',
+    'Attendance Report',
+    'Force Attendance',
+    'Overview'
+  ];
+
+  void _onItemTapped(int index) {
     setState(() {
-      _counter++;
+      _selectedIndex = index;
     });
+    Navigator.pop(context); // Close the drawer
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Text(_titles[_selectedIndex]),
       ),
-      body: Center(
-        child: Column(
-
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              child: Text('Admin Panel', style: TextStyle(color: Colors.white, fontSize: 24)),
+              decoration: BoxDecoration(color: Colors.blue),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            ListTile(
+              title: Text('Register Device'),
+              onTap: () => _onItemTapped(0),
+              selected: _selectedIndex == 0,
+              tileColor: _selectedIndex == 0 ? Colors.blue.shade100 : null,
             ),
+            ListTile(
+              title: const Text('Manage Employees'),
+              onTap: () => _onItemTapped(1),
+              selected: _selectedIndex == 1,
+              tileColor: _selectedIndex == 1 ? Colors.blue.shade100 : null,
+            ),
+            ListTile(
+              title: Text('Attendance Report'),
+              onTap: () => _onItemTapped(2),
+              selected: _selectedIndex == 2,
+              tileColor: _selectedIndex == 2 ? Colors.blue.shade100 : null,
+            ),
+            ListTile(
+              title: Text('Force Attendance'),
+              onTap: () => _onItemTapped(3),
+              selected: _selectedIndex == 3,
+              tileColor: _selectedIndex == 3 ? Colors.blue.shade100 : null,
+            ),
+            ListTile(
+              title: Text('Overview'),
+              onTap: () => _onItemTapped(4),
+              selected: _selectedIndex == 4,
+              tileColor: _selectedIndex == 4 ? Colors.blue.shade100 : null,
+            )
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: _pages[_selectedIndex],
     );
   }
 }
