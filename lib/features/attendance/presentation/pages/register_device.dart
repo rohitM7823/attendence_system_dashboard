@@ -37,9 +37,9 @@ class _RegisterDevicePageState extends State<RegisterDevicePage> {
           });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('Device ${devices[index].deviceId} Approved')),
+                content: Text('Device ${devices[index].name} Approved')),
           );
-          _showRedirectDialog(devices[index]);
+          //_showRedirectDialog(devices[index]);
         }
       },
     );

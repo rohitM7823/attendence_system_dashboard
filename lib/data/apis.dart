@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:attendence_system_dashboard/models/device.dart';
+import 'package:attendence_system_dashboard/models/employee.dart';
 import 'package:http/http.dart' as http;
 
 class Apis {
   static Future<List<Device>?> registeredDevices() async {
     try {
       final response = await http.get(
-        Uri.parse('http://172.31.160.1:8000/api/device/all'),
+        Uri.parse('http://192.168.0.5:8000/api/device/all'),
       );
       if (response.statusCode == 200) {
         final List<dynamic> deviceList = json.decode(response.body)['devices'];
@@ -25,7 +26,7 @@ class Apis {
   static Future<List<Device>?> approvedDevices() async {
     try {
       final response = await http.get(
-        Uri.parse('http://172.31.160.1:8000/api/devices/approved'),
+        Uri.parse('http://192.168.0.5:8000/api/devices/approved'),
         headers: {'platform': 'web'});
       if (response.statusCode == 200) {
         final List<dynamic> deviceList = json.decode(response.body)['devices'];
@@ -43,7 +44,7 @@ class Apis {
       String status, String deviceToken) async {
     try {
       final response = await http.post(
-          Uri.parse('http://172.31.160.1:8000/api/device/status'),
+          Uri.parse('http://192.168.0.5:8000/api/device/status'),
           headers: {
             'device_token': deviceToken,
             'platform': 'web',
@@ -66,7 +67,7 @@ class Apis {
   static Future<void> deleteDevices() async {
     try {
       final response = await http.delete(
-          Uri.parse('http://172.31.160.1:8000/api/device/all'),
+          Uri.parse('http://192.168.0.5:8000/api/device/all'),
           headers: {
             'platform': 'web',
           });
@@ -74,5 +75,38 @@ class Apis {
     } catch (ex) {
       log(ex.toString(), name: 'DELETE_DEVICES_ISSUE');
     }
+  }
+
+  static Future<List<Employee>?> employees() async {
+    try {
+      final response = await http.get(
+          Uri.parse('http://192.168.0.5:8000/api/employee/all'),
+      );
+      if (response.statusCode == 200) {
+        return List<Employee>.from(json.decode(response.body)['employees']!.map((e) => Employee.fromJson(e)));
+      }
+    } catch (ex) {
+      log(ex.toString(), name: 'ADD_SITE_ISSUE');
+      return null;
+    }
+
+    return null;
+  }
+
+  static Future<bool?> addSite(Map<String, dynamic> data) async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://192.168.0.5:8000/api/site/add'),
+        body: data
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body)['status'] as bool?;
+      }
+    } catch (ex) {
+      log(ex.toString(), name: 'ADD_SITE_ISSUE');
+      return null;
+    }
+
+    return null;
   }
 }

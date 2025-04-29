@@ -68,7 +68,6 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                 MockData.addEmployee(Employee(
                   name: _nameController.text,
                   empId: _empIdController.text,
-                  designation: _designationController.text,
                   address: _addressController.text,
                   salary: double.tryParse(_salaryController.text) ?? 0,
                   device: selectedDeviceId!,

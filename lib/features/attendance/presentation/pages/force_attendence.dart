@@ -18,10 +18,10 @@ class _ForceAttendancePageState extends State<ForceAttendancePage> {
 
   // Method to force clock in
   void _clockIn(Employee employee) {
-    setState(() {
-      employee.clockInTime = DateTime.now();
-      employee.status = "Clocked In";
-    });
+    // setState(() {
+    //   employee.clockInTime = DateTime.now();
+    //   employee.status = "Clocked In";
+    // });
     _showDialog('Clock In', '${employee.name} has been clocked in successfully.');
   }
 
@@ -41,10 +41,10 @@ class _ForceAttendancePageState extends State<ForceAttendancePage> {
       return;
     }
 
-    setState(() {
-      employee.clockOutTime = DateTime.now();
-      employee.status = "Clocked Out";
-    });
+    // setState(() {
+    //   employee.clockOutTime = DateTime.now();
+    //   employee.status = "Clocked Out";
+    // });
 
     _showDialog('Clock Out', '${employee.name} has been clocked out successfully.');
   }
@@ -89,7 +89,8 @@ class _ForceAttendancePageState extends State<ForceAttendancePage> {
           itemCount: employeesWithDevices.length,
           itemBuilder: (context, index) {
             Employee employee = employeesWithDevices[index];
-            return Card(
+            return Card();
+            /*return Card(
               margin: EdgeInsets.symmetric(vertical: 8),
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -134,7 +135,7 @@ class _ForceAttendancePageState extends State<ForceAttendancePage> {
                   ],
                 ),
               ),
-            );
+            );*/
           },
         ),
       ),

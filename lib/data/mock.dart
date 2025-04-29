@@ -12,9 +12,9 @@ class MockData {
     Device(deviceId: 'D005', platform: 'iOS', status: 'Approved'),
   ];
   static List<Employee> employees = [
-    Employee(empId: 'E001', name: 'John Doe', status: 'Not Clocked In', device: devices.first),
+    /*Employee(empId: 'E001', name: 'John Doe', status: 'Not Clocked In', device: devices.first),
     Employee(empId: 'E002', name: 'Jane Smith', status: 'Not Clocked In', device: devices[1]),
-    Employee(empId: 'E003', name: 'Mark Johnson', status: 'Not Clocked In', device: devices.last),
+    Employee(empId: 'E003', name: 'Mark Johnson', status: 'Not Clocked In', device: devices.last),*/
   ];
   static List<Attendance> attendances = [];
 
