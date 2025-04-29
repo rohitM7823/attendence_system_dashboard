@@ -8,7 +8,7 @@ class Apis {
   static Future<List<Device>?> registeredDevices() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.0.5:8000/api/device/all'),
+        Uri.parse('http://172.31.160.1:8000/api/device/all'),
       );
       if (response.statusCode == 200) {
         final List<dynamic> deviceList = json.decode(response.body)['devices'];
@@ -22,11 +22,28 @@ class Apis {
     return null;
   }
 
+  static Future<List<Device>?> approvedDevices() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://172.31.160.1:8000/api/devices/approved'),
+        headers: {'platform': 'web'});
+      if (response.statusCode == 200) {
+        final List<dynamic> deviceList = json.decode(response.body)['devices'];
+        return deviceList.map((e) => Device.fromJson(e)).toList();
+      }
+    } catch (ex) {
+      log(ex.toString(), name: 'APPROVED_DEVICE_ISSUE');
+      return null;
+    }
+
+    return null;
+  }
+
   static Future<bool> updateDeviceStatus(
       String status, String deviceToken) async {
     try {
       final response = await http.post(
-          Uri.parse('http://192.168.0.5:8000/api/device/status'),
+          Uri.parse('http://172.31.160.1:8000/api/device/status'),
           headers: {
             'device_token': deviceToken,
             'platform': 'web',
@@ -49,7 +66,7 @@ class Apis {
   static Future<void> deleteDevices() async {
     try {
       final response = await http.delete(
-          Uri.parse('http://192.168.0.5:8000/api/device/all'),
+          Uri.parse('http://172.31.160.1:8000/api/device/all'),
           headers: {
             'platform': 'web',
           });

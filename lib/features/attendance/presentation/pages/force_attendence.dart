@@ -14,7 +14,7 @@ class _ForceAttendancePageState extends State<ForceAttendancePage> {
   List<Employee> employees = MockData.employees;
 
   // Minimum threshold time for clock-out (e.g., 30 minutes)
-  final Duration clockOutThreshold = Duration(minutes: 30);
+  final Duration clockOutThreshold = const Duration(minutes: 30);
 
   // Method to force clock in
   void _clockIn(Employee employee) {

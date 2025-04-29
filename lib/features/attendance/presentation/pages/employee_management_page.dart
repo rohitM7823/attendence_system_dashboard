@@ -1,3 +1,4 @@
+import 'package:attendence_system_dashboard/data/apis.dart';
 import 'package:attendence_system_dashboard/data/mock.dart';
 import 'package:attendence_system_dashboard/models/device.dart';
 import 'package:attendence_system_dashboard/models/employee.dart';
@@ -14,6 +15,7 @@ class EmployeeManagementPage extends StatefulWidget {
 }
 
 class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _empIdController = TextEditingController();
   final TextEditingController _designationController = TextEditingController();
@@ -42,6 +44,14 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
     if (widget.preselectedDevice != null) {
       _selectedDeviceId = widget.preselectedDevice;
     }
+
+    Apis.approvedDevices().then((value) {
+      if(value != null) {
+        setState(() {
+          devices = value;
+        });
+      }
+    },);
   }
 
   // Method to delete employee

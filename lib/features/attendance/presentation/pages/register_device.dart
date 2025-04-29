@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'employee_management_page.dart';
 
 class RegisterDevicePage extends StatefulWidget {
+  const RegisterDevicePage({super.key});
+
   @override
   _RegisterDevicePageState createState() => _RegisterDevicePageState();
 }
