@@ -1,8 +1,10 @@
+import 'package:attendence_system_dashboard/features/attendance/presentation/pages/add_stite_page.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/attendence_report.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/employee_management_page.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/force_attendence.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/overview_page.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/register_device.dart';
+import 'package:attendence_system_dashboard/features/attendance/presentation/pages/settings.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -34,17 +36,21 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
   final List<Widget> _pages = [
     RegisterDevicePage(),
+    AddSitePage(),
     EmployeeManagementPage(),
     AttendanceReportPage(),
     ForceAttendancePage(),
+    SettingsPage(),
     OverviewPage()
   ];
 
   final List<String> _titles = [
     'Register Device',
+    'Site Add',
     'Manage Employees',
     'Attendance Report',
     'Force Attendance',
+    'Settings Page',
     'Overview'
   ];
 
@@ -75,28 +81,39 @@ class _AdminHomePageState extends State<AdminHomePage> {
               tileColor: _selectedIndex == 0 ? Colors.blue.shade100 : null,
             ),
             ListTile(
-              title: const Text('Manage Employees'),
+              title: Text('Add Your Site'),
               onTap: () => _onItemTapped(1),
               selected: _selectedIndex == 1,
               tileColor: _selectedIndex == 1 ? Colors.blue.shade100 : null,
             ),
             ListTile(
-              title: Text('Attendance Report'),
+              title: const Text('Manage Employees'),
               onTap: () => _onItemTapped(2),
               selected: _selectedIndex == 2,
               tileColor: _selectedIndex == 2 ? Colors.blue.shade100 : null,
             ),
             ListTile(
-              title: Text('Force Attendance'),
+              title: Text('Attendance Report'),
               onTap: () => _onItemTapped(3),
               selected: _selectedIndex == 3,
               tileColor: _selectedIndex == 3 ? Colors.blue.shade100 : null,
             ),
             ListTile(
-              title: Text('Overview'),
+              title: Text('Force Attendance'),
               onTap: () => _onItemTapped(4),
               selected: _selectedIndex == 4,
               tileColor: _selectedIndex == 4 ? Colors.blue.shade100 : null,
+            ),
+            ListTile(
+              title: Text('Settings'),
+              onTap: () => _onItemTapped(5),
+              selected: _selectedIndex == 5,
+              tileColor: _selectedIndex == 5 ? Colors.blue.shade100 : null),
+            ListTile(
+              title: Text('Overview'),
+              onTap: () => _onItemTapped(6),
+              selected: _selectedIndex == 6,
+              tileColor: _selectedIndex == 6 ? Colors.blue.shade100 : null,
             )
           ],
         ),
