@@ -1,3 +1,8 @@
+import 'dart:developer';
+
+import 'package:attendence_system_dashboard/core/utils/time_utils.dart';
+import 'package:attendence_system_dashboard/data/apis.dart';
+import 'package:attendence_system_dashboard/models/employee.dart';
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -8,233 +13,184 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  final _formKey = GlobalKey<FormState>();
-  TimeOfDay? _clockIn;
-  TimeOfDay? _clockOut;
-  TimeOfDay? _windowStart;
-  TimeOfDay? _windowEnd;
-  final _radiusController = TextEditingController();
-  bool _isSubmitting = false;
+  List<Shift> _clockIns = [
+    Shift(),
+    Shift(),
+    Shift()
+  ];
 
-  Future<void> _pickTime(BuildContext context, TimeOfDay? currentValue,
-      Function(TimeOfDay) onPicked) async {
+  @override
+  void initState() {
+    super.initState();
+    Apis.shifts().then(
+      (value) {
+        if (value?.isNotEmpty == true) {
+          setState(() {
+            _clockIns = value ?? [];
+          });
+        }
+      },
+    );
+  }
+
+  TimeOfDay _addHours(TimeOfDay time, int hours) {
+    final totalMinutes = time.hour * 60 + time.minute + hours * 60;
+    return TimeOfDay(
+        hour: (totalMinutes ~/ 60) % 24, minute: totalMinutes % 60);
+  }
+
+  TimeOfDay _addMinutes(TimeOfDay time, int minutes) {
+    final totalMinutes = time.hour * 60 + time.minute + minutes;
+    return TimeOfDay(
+        hour: (totalMinutes ~/ 60) % 24, minute: totalMinutes % 60);
+  }
+
+  Future<void> _pickTime(int index) async {
     final picked = await showTimePicker(
       context: context,
-      initialTime: currentValue ?? TimeOfDay.now(),
+      initialTime: _clockIns[index].clockIn?.toTimeOfDay ??
+          const TimeOfDay(hour: 8, minute: 0),
     );
     if (picked != null) {
-      onPicked(picked);
+      setState(() {
+        _clockIns[index] = _clockIns[index].copyWith(
+          clockIn: picked.toDateTime,
+        );
+      });
     }
   }
 
-  Widget buildTimeField(String label, TimeOfDay? time, VoidCallback onTap) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              border: Border.all(
-                color: Colors.grey.shade300,
-                width: 1.5,
+  String _format(TimeOfDay? time) => time?.format(context) ?? '--:--';
+
+  Widget _buildShiftCard(int index) {
+    final clockIn = _clockIns[index];
+    final clockOut = clockIn.clockIn != null
+        ? _addHours(clockIn.clockIn!.toTimeOfDay, 8)
+        : null;
+    final clockInStart = clockIn.clockIn != null
+        ? _addMinutes(clockIn.clockIn!.toTimeOfDay, -30)
+        : null;
+    final clockInEnd = clockIn.clockIn != null
+        ? _addMinutes(clockIn.clockIn!.toTimeOfDay, 30)
+        : null;
+    final clockOutStart = clockOut != null ? _addMinutes(clockOut, -120) : null;
+    final clockOutEnd = clockOut != null ? _addMinutes(clockOut, 120) : null;
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Shift ${index + 1}',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            Text('Clock In Time',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () => _pickTime(index),
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  border: Border.all(color: Colors.grey.shade300, width: 1.5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                    clockIn.clockIn != null ? _format(clockIn.clockIn!.toTimeOfDay) : '--:--',
+                  style: const TextStyle(fontSize: 16),
+                ),
               ),
-              borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(
-              time != null ? time.format(context) : 'Select time',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
+            const SizedBox(height: 16),
+            if (clockOut != null) ...[
+              _infoRow('Clock Out Time', _format(clockOut)),
+              _infoRow('Clock-In Window',
+                  '${_format(clockInStart)} - ${_format(clockInEnd)}'),
+              _infoRow('Clock-Out Window',
+                  '${_format(clockOutStart)} - ${_format(clockOutEnd)}'),
+            ],
+          ],
         ),
-        const SizedBox(height: 20),
-      ],
+      ),
     );
   }
 
-  Widget buildTextField({
-    required String label,
-    required TextEditingController controller,
-    required String? Function(String?) validator,
-    TextInputType keyboardType = TextInputType.number,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
-        const SizedBox(height: 8),
-        Focus(
-          child: Builder(builder: (context) {
-            return TextFormField(
-              controller: controller,
-              validator: validator,
-              keyboardType: keyboardType,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide:
-                  BorderSide(color: Colors.grey.shade300, width: 1.5),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.indigo, width: 2),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.red.shade400, width: 1.5),
-                ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.red.shade400, width: 2),
-                ),
-              ),
-            );
-          }),
-        ),
-        const SizedBox(height: 20),
-      ],
+  Widget _infoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade800)),
+          Text(value,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+        ],
+      ),
     );
   }
 
-  bool get _isFormValid {
-    return !_isSubmitting &&
-        _clockIn != null &&
-        _clockOut != null &&
-        _windowStart != null &&
-        _windowEnd != null &&
-        int.tryParse(_radiusController.text) != null;
-  }
-
-  void _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_clockIn == null || _clockOut == null || _windowStart == null || _windowEnd == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please select all time fields")));
+  void _saveSettings() async {
+    final allSet = _clockIns.every((time) => time.clockIn != null);
+    if (!allSet) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please select all clock-in times")),
+      );
       return;
     }
 
-    setState(() => _isSubmitting = true);
-    await Future.delayed(Duration(seconds: 2));
-    setState(() => _isSubmitting = false);
+    for (var time in _clockIns) {
+      log('index: ${_clockIns.indexOf(time)} clockIn: ${time.clockIn?.toTimeOfDay}', name: 'SettingsPage');
+      await Apis.addShift({
+        'id': _clockIns.indexOf(time)+1,
+        'clock_in': time.clockIn?.toIso8601String(),
+      });
+    }
 
+    // Handle saving logic here (e.g., save to Firestore or shared preferences)
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text("Saved"),
-        content: Text(
-          "Clock In: ${_clockIn!.format(context)}\n"
-              "Clock Out: ${_clockOut!.format(context)}\n"
-              "Radius: ${_radiusController.text} meters\n"
-              "Window: ${_windowStart!.format(context)} - ${_windowEnd!.format(context)}",
-        ),
+        title: Text("Settings Saved"),
+        content: Text("All shift timings configured successfully."),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
+    return Scaffold(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 500),
-          child: Card(
-            elevation: 6,
-            shadowColor: Colors.black12,
-            shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Form(
-                key: _formKey,
-                onChanged: () => setState(() {}),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Settings',
-                        style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87)),
-                    const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: buildTimeField('Clock In Time', _clockIn,
-                                  () => _pickTime(context, _clockIn, (t) => setState(() => _clockIn = t))),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: buildTimeField('Clock Out Time', _clockOut,
-                                  () => _pickTime(context, _clockOut, (t) => setState(() => _clockOut = t))),
-                        ),
-                      ],
-                    ),
-                    buildTextField(
-                      label: 'Radius (meters)',
-                      controller: _radiusController,
-                      validator: (value) {
-                        final r = int.tryParse(value ?? '');
-                        if (r == null || r <= 0) return 'Enter valid radius';
-                        return null;
-                      },
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: buildTimeField('Attendance Start', _windowStart,
-                                  () => _pickTime(context, _windowStart, (t) => setState(() => _windowStart = t))),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: buildTimeField('Attendance End', _windowEnd,
-                                  () => _pickTime(context, _windowEnd, (t) => setState(() => _windowEnd = t))),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isFormValid ? _submit : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.indigo,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 18),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          disabledBackgroundColor: Colors.grey.shade300,
-                          disabledForegroundColor: Colors.grey.shade700,
-                        ),
-                        child: _isSubmitting
-                            ? SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                            : Text('Save Settings',
-                            style: TextStyle(fontSize: 16)),
-                      ),
-                    )
-                  ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Configure Shifts",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 24),
+            ...List.generate(3, (index) => _buildShiftCard(index)),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _saveSettings,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.indigo,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
+                child: Text("Save Settings", style: TextStyle(fontSize: 16)),
               ),
-            ),
-          ),
+            )
+          ],
         ),
       ),
     );

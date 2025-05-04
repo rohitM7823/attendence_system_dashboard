@@ -38,20 +38,16 @@ class _AdminHomePageState extends State<AdminHomePage> {
     RegisterDevicePage(),
     AddSitePage(),
     EmployeeManagementPage(),
-    AttendanceReportPage(),
-    ForceAttendancePage(),
+    //AttendanceReportPage(),
     SettingsPage(),
-    OverviewPage()
   ];
 
   final List<String> _titles = [
     'Register Device',
     'Site Add',
     'Manage Employees',
-    'Attendance Report',
-    'Force Attendance',
+    //'Attendance Report',
     'Settings Page',
-    'Overview'
   ];
 
   void _onItemTapped(int index) {
@@ -92,29 +88,17 @@ class _AdminHomePageState extends State<AdminHomePage> {
               selected: _selectedIndex == 2,
               tileColor: _selectedIndex == 2 ? Colors.blue.shade100 : null,
             ),
-            ListTile(
-              title: Text('Attendance Report'),
-              onTap: () => _onItemTapped(3),
-              selected: _selectedIndex == 3,
-              tileColor: _selectedIndex == 3 ? Colors.blue.shade100 : null,
-            ),
-            ListTile(
-              title: Text('Force Attendance'),
-              onTap: () => _onItemTapped(4),
-              selected: _selectedIndex == 4,
-              tileColor: _selectedIndex == 4 ? Colors.blue.shade100 : null,
-            ),
+            // ListTile(
+            //   title: Text('Attendance Report'),
+            //   onTap: () => _onItemTapped(3),
+            //   selected: _selectedIndex == 3,
+            //   tileColor: _selectedIndex == 3 ? Colors.blue.shade100 : null,
+            // ),
             ListTile(
               title: Text('Settings'),
-              onTap: () => _onItemTapped(5),
-              selected: _selectedIndex == 5,
-              tileColor: _selectedIndex == 5 ? Colors.blue.shade100 : null),
-            ListTile(
-              title: Text('Overview'),
-              onTap: () => _onItemTapped(6),
-              selected: _selectedIndex == 6,
-              tileColor: _selectedIndex == 6 ? Colors.blue.shade100 : null,
-            )
+              onTap: () => _onItemTapped(3),
+              selected: _selectedIndex == 3,
+              tileColor: _selectedIndex == 3 ? Colors.blue.shade100 : null),
           ],
         ),
       ),

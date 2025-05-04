@@ -1,4 +1,4 @@
-
+import 'package:attendence_system_dashboard/data/apis.dart';
 import 'package:flutter/material.dart';
 
 class AddSitePage extends StatefulWidget {
@@ -20,19 +20,30 @@ class _AddSitePageState extends State<AddSitePage> {
 
     setState(() => _isSubmitting = true);
 
-    await Future.delayed(Duration(seconds: 2)); // Simulate API call
+    await Apis.addSite({
+      'name': _siteNameController.text,
+      'location': {
+        'lat': double.parse(_latController.text),
+        'lng': double.parse(_lngController.text)
+      },
+      'radius': int.parse(_radiusController.text),
+    }).then(
+      (value) {
+        if (value == true) {
+          showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: Text("Submitted"),
+              content: Text("✔ Site: ${_siteNameController.text}\n"
+                  "✔ Lat: ${_latController.text}, Lng: ${_lngController.text}\n"
+                  "✔ Radius: ${_radiusController.text} m"),
+            ),
+          );
+        }
+      },
+    );
 
     setState(() => _isSubmitting = false);
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("Submitted"),
-        content: Text("✔ Site: ${_siteNameController.text}\n"
-            "✔ Lat: ${_latController.text}, Lng: ${_lngController.text}\n"
-            "✔ Radius: ${_radiusController.text} m"),
-      ),
-    );
   }
 
   Widget buildField({
@@ -58,11 +69,11 @@ class _AddSitePageState extends State<AddSitePage> {
                 filled: true,
                 fillColor: Colors.grey.shade100,
                 contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                    EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide:
-                  BorderSide(color: Colors.grey.shade300, width: 1.5),
+                      BorderSide(color: Colors.grey.shade300, width: 1.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -70,7 +81,8 @@ class _AddSitePageState extends State<AddSitePage> {
                 ),
                 errorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.red.shade400, width: 1.5),
+                  borderSide:
+                      BorderSide(color: Colors.red.shade400, width: 1.5),
                 ),
                 focusedErrorBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -104,7 +116,7 @@ class _AddSitePageState extends State<AddSitePage> {
             elevation: 6,
             shadowColor: Colors.black12,
             shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Form(
@@ -121,15 +133,16 @@ class _AddSitePageState extends State<AddSitePage> {
                     buildField(
                       label: 'Site Name',
                       controller: _siteNameController,
-                      validator: (value) => value == null || value.trim().isEmpty
-                          ? 'Site name is required'
-                          : null,
+                      validator: (value) =>
+                          value == null || value.trim().isEmpty
+                              ? 'Site name is required'
+                              : null,
                     ),
                     buildField(
                       label: 'Latitude',
                       controller: _latController,
                       keyboardType:
-                      TextInputType.numberWithOptions(decimal: true),
+                          TextInputType.numberWithOptions(decimal: true),
                       validator: (value) {
                         final lat = double.tryParse(value ?? '');
                         if (lat == null || lat < -90 || lat > 90) {
@@ -142,7 +155,7 @@ class _AddSitePageState extends State<AddSitePage> {
                       label: 'Longitude',
                       controller: _lngController,
                       keyboardType:
-                      TextInputType.numberWithOptions(decimal: true),
+                          TextInputType.numberWithOptions(decimal: true),
                       validator: (value) {
                         final lng = double.tryParse(value ?? '');
                         if (lng == null || lng < -180 || lng > 180) {
@@ -180,13 +193,13 @@ class _AddSitePageState extends State<AddSitePage> {
                         ),
                         child: _isSubmitting
                             ? SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
                             : Text('Submit', style: TextStyle(fontSize: 16)),
                       ),
                     )

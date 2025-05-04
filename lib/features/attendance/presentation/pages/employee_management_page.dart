@@ -3,6 +3,7 @@ import 'package:attendence_system_dashboard/data/mock.dart';
 import 'package:attendence_system_dashboard/models/device.dart';
 import 'package:attendence_system_dashboard/models/employee.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class EmployeeManagementPage extends StatefulWidget {
   final Device? preselectedDevice; // To accept preselected device
@@ -84,24 +85,28 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
           children: [
             const SizedBox(height: 16),
             Flexible(
-              child: employees.isNotEmpty ? ListView.builder(
-                itemCount: employees.length,
-                itemBuilder: (context, index) {
-                  final employee = employees[index];
-                  return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: ListTile(
-                        title: Text(employee.name ?? '',
-                            style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text(
-                            'Emp ID: ${employee.empId}\nAadhar Card: ${employee.aadharCard} | Mobile Number: ${employee.mobileNumber}\nLocation: ${employee.location} | Address ${employee.address}'),
-                      ));
-                },
-              ) : Center(child: Text('No employees are registered!.')),
+              child: employees.isNotEmpty
+                  ? ListView.builder(
+                      itemCount: employees.length,
+                      itemBuilder: (context, index) {
+                        final employee = employees[index];
+                        return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: ListTile(
+                              title: Text(employee.name ?? '',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                              subtitle: Text(
+                                  'Emp ID: ${employee.empId}\nAadhar Card: ${employee.aadharCard} | Mobile Number: ${employee.mobileNumber}\nShift: ${DateFormat('MMM d, yyyy hh:mm a').format(employee.shift!.clockIn!)} - ${DateFormat('MMM d, yyyy hh:mm a').format(employee.shift!.clockOut!)}\nAddress: ${employee.address}\nAccount Number: ${employee.accountNumber} | Site Name: ${employee.siteName}\nClock In: ${employee.clockInTime != null ? DateFormat('MMM d, yyyy hh:mm a').format(employee.clockInTime!) : 'Not clocked in'} | Clock Out: ${employee.clockOutTime != null ? DateFormat('MMM d, yyyy hh:mm a').format(employee.clockOutTime!) : 'Not clocked out'}', style:  const TextStyle(
+                                  fontWeight: FontWeight.bold)),
+                            ));
+                      },
+                    )
+                  : Center(child: Text('No employees are registered!.')),
             ),
           ],
         ),
