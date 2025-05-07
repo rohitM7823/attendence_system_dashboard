@@ -6,9 +6,8 @@ import 'package:attendence_system_dashboard/models/employee.dart';
 import 'package:http/http.dart' as http;
 
 class Apis {
-  
   static const BASE_URL = 'https://gsa.ezonedigital.com/api';
-  
+
   static Future<List<Device>?> registeredDevices() async {
     try {
       final response = await http.get(
@@ -28,8 +27,7 @@ class Apis {
 
   static Future<List<Device>?> approvedDevices() async {
     try {
-      final response = await http.get(
-          Uri.parse('$BASE_URL/devices/approved'),
+      final response = await http.get(Uri.parse('$BASE_URL/devices/approved'),
           headers: {'platform': 'web'});
       if (response.statusCode == 200) {
         final List<dynamic> deviceList = json.decode(response.body)['devices'];
@@ -46,15 +44,13 @@ class Apis {
   static Future<bool> updateDeviceStatus(
       String status, String deviceToken) async {
     try {
-      final response = await http.post(
-          Uri.parse('$BASE_URL/device/status'),
-          headers: {
-            'device_token': deviceToken,
-            'platform': 'web',
-          },
-          body: {
-            'status': status
-          });
+      final response =
+          await http.post(Uri.parse('$BASE_URL/device/status'), headers: {
+        'device_token': deviceToken,
+        'platform': 'web',
+      }, body: {
+        'status': status
+      });
       if (response.statusCode == 200) {
         final String? status = json.decode(response.body)['status'];
         return status != null;
@@ -69,11 +65,10 @@ class Apis {
 
   static Future<void> deleteDevices() async {
     try {
-      final response = await http.delete(
-          Uri.parse('$BASE_URL/device/all'),
-          headers: {
-            'platform': 'web',
-          });
+      final response =
+          await http.delete(Uri.parse('$BASE_URL/device/all'), headers: {
+        'platform': 'web',
+      });
     } catch (ex) {
       log(ex.toString(), name: 'DELETE_DEVICES_ISSUE');
     }
@@ -99,10 +94,11 @@ class Apis {
 
   static Future<bool?> addSite(Map<String, dynamic> data) async {
     try {
-      final response = await http
-          .post(Uri.parse('$BASE_URL/site/add'),  headers: {
-        'Content-Type': 'application/json',
-      }, body: jsonEncode(data));
+      final response = await http.post(Uri.parse('$BASE_URL/site/add'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode(data));
       if (response.statusCode == 200) {
         return json.decode(response.body)['status'] as bool?;
       }
@@ -116,12 +112,11 @@ class Apis {
 
   static Future<bool?> addShift(Map<String, dynamic> data) async {
     try {
-      final response =
-          await http.post(Uri.parse('$BASE_URL/shifts'),
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: jsonEncode(data));
+      final response = await http.post(Uri.parse('$BASE_URL/shifts'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode(data));
       return true;
     } catch (ex) {
       log(ex.toString(), name: 'ADD_SHIFT_ISSUE');
@@ -142,6 +137,38 @@ class Apis {
       return null;
     } catch (ex) {
       log(ex.toString(), name: 'SHIFTS_ISSUE');
+      return null;
+    }
+  }
+
+  static Future<List<Site>?> availableSties() async {
+    try {
+      final response = await http.get(Uri.parse('$BASE_URL/sites'), headers: {
+        'platform': 'web',
+      });
+      return List.from(
+          json.decode(response.body)['sites']!.map((e) => Site.fromJson(e)));
+    } catch (ex) {
+      log(ex.toString(), name: 'AVAILABLE_STIES_ISSUE');
+      return null;
+    }
+  }
+
+  static Future<bool?> updateEmployee(Employee employee) async {
+    try {
+      final response =
+          await http.post(Uri.parse('$BASE_URL/employee/${employee.id}'),
+              headers: {
+                'platform': 'web',
+                'Accept': 'application/json'
+              },
+              body: jsonEncode(employee.toJson()));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)['status'] as bool?;
+      }
+      return null;
+    } catch (ex) {
+      log(ex.toString(), name: 'UPDATE_EMPLOYEE_ISSUE');
       return null;
     }
   }

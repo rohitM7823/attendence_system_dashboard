@@ -1,5 +1,6 @@
 import 'package:attendence_system_dashboard/data/apis.dart';
 import 'package:attendence_system_dashboard/data/mock.dart';
+import 'package:attendence_system_dashboard/features/attendance/presentation/pages/edit_employee.dart';
 import 'package:attendence_system_dashboard/models/device.dart';
 import 'package:attendence_system_dashboard/models/employee.dart';
 import 'package:flutter/material.dart';
@@ -97,12 +98,22 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: ListTile(
-                              title: Text(employee.name ?? '',
+                              title: Text('${index+1},  ${employee.name}',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold)),
                               subtitle: Text(
                                   'Emp ID: ${employee.empId}\nAadhar Card: ${employee.aadharCard} | Mobile Number: ${employee.mobileNumber}\nShift: ${DateFormat('MMM d, yyyy hh:mm a').format(employee.shift!.clockIn!)} - ${DateFormat('MMM d, yyyy hh:mm a').format(employee.shift!.clockOut!)}\nAddress: ${employee.address}\nAccount Number: ${employee.accountNumber} | Site Name: ${employee.siteName}\nClock In: ${employee.clockInTime != null ? DateFormat('MMM d, yyyy hh:mm a').format(employee.clockInTime!) : 'Not clocked in'} | Clock Out: ${employee.clockOutTime != null ? DateFormat('MMM d, yyyy hh:mm a').format(employee.clockOutTime!) : 'Not clocked out'}', style:  const TextStyle(
                                   fontWeight: FontWeight.bold)),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(onPressed: () {
+                                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => UpdateEmployeeForm(
+                                      employee: employee,
+                                    ),));
+                                  }, icon: Icon(Icons.edit, color: Colors.black,))
+                                ],
+                              ),
                             ));
                       },
                     )

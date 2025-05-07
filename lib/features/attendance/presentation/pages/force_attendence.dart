@@ -74,7 +74,7 @@ class _ForceAttendancePageState extends State<ForceAttendancePage> {
   Widget build(BuildContext context) {
     // Filter out employees that don't have registered devices
     List<Employee> employeesWithDevices = employees.where((employee) {
-      return MockData.devices.any((device) => device.deviceId == employee.device?.deviceId && device.isApproved == true);
+      return MockData.devices.any((device) => device.isApproved == true);
     }).toList();
 
     return Scaffold(
