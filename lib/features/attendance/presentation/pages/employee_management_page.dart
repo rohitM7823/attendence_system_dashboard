@@ -24,7 +24,7 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
   final TextEditingController _salaryController = TextEditingController();
 
   // Employee list
-  List<Employee> employees = MockData.employees;
+  List<Employee> employees = [];
 
   // List of approved devices (this can be from your mock data or API)
   List<Device> devices = MockData.devices;
@@ -65,6 +65,19 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
     _showDialog('Deleted', 'Employee removed successfully!');
   }*/
 
+  Future<void> deleteEmployee(Employee emp) async {
+    await Apis.deleteEmployee(emp.id).then(
+      (value) {
+        if (value == true) {
+          setState(() {
+            employees =
+                employees.where((element) => element.id != emp.id).toList();
+          });
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,20 +111,48 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: ListTile(
-                              title: Text('${index+1},  ${employee.name}',
+                              title: Text('${index + 1},  ${employee.name}',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold)),
                               subtitle: Text(
-                                  'Emp ID: ${employee.empId}\nAadhar Card: ${employee.aadharCard} | Mobile Number: ${employee.mobileNumber}\nShift: ${DateFormat('MMM d, yyyy hh:mm a').format(employee.shift!.clockIn!)} - ${DateFormat('MMM d, yyyy hh:mm a').format(employee.shift!.clockOut!)}\nAddress: ${employee.address}\nAccount Number: ${employee.accountNumber} | Site Name: ${employee.siteName}\nClock In: ${employee.clockInTime != null ? DateFormat('MMM d, yyyy hh:mm a').format(employee.clockInTime!) : 'Not clocked in'} | Clock Out: ${employee.clockOutTime != null ? DateFormat('MMM d, yyyy hh:mm a').format(employee.clockOutTime!) : 'Not clocked out'}', style:  const TextStyle(
-                                  fontWeight: FontWeight.bold)),
+                                  'Emp ID: ${employee.empId}\nAadhar Card: ${employee.aadharCard} | Mobile Number: ${employee.mobileNumber}\n\nShift:\n${_shiftClockIn(employee.shift)}\n${_shiftClockOut(employee.shift)}\n\nAddress: ${employee.address}\nAccount Number: ${employee.accountNumber} | Site Name: ${employee.siteName}\nClock In: ${_clockInTime(employee)} | Clock Out: ${_clockOutTime(employee)}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  IconButton(onPressed: () {
-                                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => UpdateEmployeeForm(
-                                      employee: employee,
-                                    ),));
-                                  }, icon: Icon(Icons.edit, color: Colors.black,))
+                                  IconButton(
+                                      onPressed: () async {
+                                        var result = await Navigator.of(context)
+                                            .push(MaterialPageRoute(
+                                          builder: (context) =>
+                                              UpdateEmployeeForm(
+                                            employee: employee,
+                                          ),
+                                        ));
+                                        if (result is bool && result == true) {
+                                          Apis.employees().then((value) {
+                                            if (value != null) {
+                                              setState(() {
+                                                employees = value;
+                                              });
+                                            }
+                                          });
+                                        }
+                                      },
+                                      icon: Icon(
+                                        Icons.edit,
+                                        color: Colors.black,
+                                      )),
+                                  IconButton(
+                                      onPressed: () {
+                                        deleteEmployee(employee);
+                                      },
+                                      icon: Icon(
+                                        Icons.delete,
+                                        color: Colors.redAccent,
+                                      )),
+
                                 ],
                               ),
                             ));
@@ -163,5 +204,91 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
         ),
       ),
     );
+  }
+
+  String _clockInTime(Employee emp) {
+    if (emp
+        case Employee(
+          id: _,
+          name: _,
+          empId: _,
+          address: _,
+          token: _,
+          accountNumber: _,
+          siteName: _,
+          location: _,
+          clockInTime: DateTime clockIn,
+          clockOutTime: _,
+          aadharCard: _,
+          mobileNumber: _,
+          shift: _,
+          faceData: _
+        )) {
+      return DateFormat('MMM d, yyyy hh:mm a').format(clockIn);
+    }
+    return 'Not clocked in';
+  }
+
+  String _clockOutTime(Employee emp) {
+    if (emp
+        case Employee(
+          id: _,
+          name: _,
+          empId: _,
+          address: _,
+          token: _,
+          accountNumber: _,
+          siteName: _,
+          location: _,
+          clockInTime: _,
+          clockOutTime: DateTime clockOut,
+          aadharCard: _,
+          mobileNumber: _,
+          shift: _,
+          faceData: _
+        )) {
+      return DateFormat('MMM d, yyyy hh:mm a').format(clockOut);
+    }
+    return 'Not clocked out';
+  }
+
+  String _shiftClockIn(Shift? shift) {
+    switch (shift) {
+      case Shift(
+          id: _,
+          clockIn: _,
+          clockOut: _,
+          clockInWindow: ClockWindow(
+            start: DateTime windowStart,
+            end: DateTime windowEnd
+          ),
+          clockOutWindow: _,
+          createdAt: _,
+          updatedAt: _
+        ):
+        return 'Start: ${DateFormat('MMM d, yyyy hh:mm a').format(windowStart)} - End: ${DateFormat('MMM d, yyyy hh:mm a').format(windowEnd)}';
+      default:
+        return 'Clock-in window is not available';
+    }
+  }
+
+  String _shiftClockOut(Shift? shift) {
+    switch (shift) {
+      case Shift(
+          id: _,
+          clockIn: _,
+          clockOut: _,
+          clockInWindow: _,
+          clockOutWindow: ClockWindow(
+            start: DateTime windowStart,
+            end: DateTime windowEnd
+          ),
+          createdAt: _,
+          updatedAt: _
+        ):
+        return 'Start: ${DateFormat('MMM d, yyyy hh:mm a').format(windowStart)} - End ${DateFormat('MMM d, yyyy hh:mm a').format(windowEnd)}';
+      default:
+        return 'Clock-out window is not available';
+    }
   }
 }

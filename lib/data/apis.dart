@@ -6,7 +6,7 @@ import 'package:attendence_system_dashboard/models/employee.dart';
 import 'package:http/http.dart' as http;
 
 class Apis {
-  static const BASE_URL = 'https://gsa.ezonedigital.com/api';
+  static const BASE_URL = 'http://192.168.0.34:8000/api';
 
   static Future<List<Device>?> registeredDevices() async {
     try {
@@ -157,18 +157,37 @@ class Apis {
   static Future<bool?> updateEmployee(Employee employee) async {
     try {
       final response =
-          await http.post(Uri.parse('$BASE_URL/employee/${employee.id}'),
+          await http.post(Uri.parse('$BASE_URL/employee/${employee.id}/update'),
               headers: {
                 'platform': 'web',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
               },
               body: jsonEncode(employee.toJson()));
       if (response.statusCode == 200) {
+        log("${jsonDecode(response.body)['status'] as bool?}",
+            name: 'ÚPDATE_EMPLOYEE');
         return jsonDecode(response.body)['status'] as bool?;
       }
       return null;
     } catch (ex) {
       log(ex.toString(), name: 'UPDATE_EMPLOYEE_ISSUE');
+      return null;
+    }
+  }
+
+  static Future<bool?> deleteEmployee(int? id) async {
+    try {
+      final response =
+          await http.delete(Uri.parse('$BASE_URL/employee/$id/delete'), headers: {
+            'platform': 'web'
+          });
+      if (response.statusCode == 200) {
+        return true;
+      }
+      return null;
+    } catch (ex) {
+      log(ex.toString(), name: 'DELETE_EMPLOYEE_ISSUE');
       return null;
     }
   }

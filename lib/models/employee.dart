@@ -47,11 +47,12 @@ class Employee {
           : null,
       location: json['location'] as Map<String, dynamic>?,
       mobileNumber: json['mobile_number'],
-      accountNumber: json['salary'],
+      accountNumber: json['account_number'],
       siteName: json['site_name'],
       token: json['token'],
       faceData: json["face_metadata"],
       shift: json['shift'] != null ? Shift.fromJson(json['shift']) : null,
+
     );
   }
 

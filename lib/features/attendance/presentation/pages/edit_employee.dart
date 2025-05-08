@@ -51,6 +51,7 @@ class _UpdateEmployeeFormState extends State<UpdateEmployeeForm> {
                 _shifts = value!;
                 _selectedShift = value.firstWhere(
                   (element) => element.id == widget.employee.shift?.id,
+                  orElse: () => value.first,
                 );
               });
             }
@@ -64,6 +65,7 @@ class _UpdateEmployeeFormState extends State<UpdateEmployeeForm> {
                 (e) =>
                     e.name?.toLowerCase() ==
                     widget.employee.siteName?.toLowerCase(),
+                orElse: () => value.first,
               );
             });
           }
@@ -109,30 +111,43 @@ class _UpdateEmployeeFormState extends State<UpdateEmployeeForm> {
                 }),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      setState(() => _updateLoadingState = true);
-                      Apis.updateEmployee(
-                        Employee(
-                          id: widget.employee.id,
-                          name: _nameController.text.trim(),
-                          empId: _employeeIdController.text.trim(),
-                          address: _addressController.text.trim(),
-                          accountNumber: _accountNumberController.text.trim(),
-                          siteName: _selectedSite?.name,
-                          shift: _selectedShift,
-                          aadharCard: _aadharController.text.trim(),
-                          mobileNumber: _mobileNumberController.text.trim(),
-                        ),
-                      ).then((value) {
-                        setState(() {
-                          _updateLoadingState = false;
-                        });
-                        if(value == true){
-
-                        }
-                      },);
-                    }
+                  onPressed: _updateLoadingState ? null : () async {
+                    setState(() => _updateLoadingState = true);
+                    await Apis.updateEmployee(
+                      Employee(
+                        id: widget.employee.id,
+                        name: _nameController.text.trim(),
+                        empId: _employeeIdController.text.trim(),
+                        address: _addressController.text.trim(),
+                        accountNumber: _accountNumberController.text.trim(),
+                        siteName: _selectedSite?.name,
+                        shift: _selectedShift,
+                        aadharCard: _aadharController.text.trim(),
+                        mobileNumber: _mobileNumberController.text.trim(),
+                      ),
+                    ).then((value) {
+                      setState(() {
+                        _updateLoadingState = false;
+                      });
+                      if(value == true){
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: Text("Employee Updated"),
+                            content: Text("Employee Details Updated Successfully"),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pop(true);
+                                },
+                                child: const Text("OK"),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey.shade300,
