@@ -17,11 +17,6 @@ class EmployeeManagementPage extends StatefulWidget {
 }
 
 class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _empIdController = TextEditingController();
-  final TextEditingController _designationController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _salaryController = TextEditingController();
 
   // Employee list
   List<Employee> employees = [];
@@ -110,51 +105,104 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: ListTile(
-                              title: Text('${index + 1},  ${employee.name}',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              subtitle: Text(
-                                  'Emp ID: ${employee.empId}\nAadhar Card: ${employee.aadharCard} | Mobile Number: ${employee.mobileNumber}\n\nShift:\n${_shiftClockIn(employee.shift)}\n${_shiftClockOut(employee.shift)}\n\nAddress: ${employee.address}\nAccount Number: ${employee.accountNumber} | Site Name: ${employee.siteName}\nClock In: ${_clockInTime(employee)} | Clock Out: ${_clockOutTime(employee)}',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                      onPressed: () async {
-                                        var result = await Navigator.of(context)
-                                            .push(MaterialPageRoute(
-                                          builder: (context) =>
-                                              UpdateEmployeeForm(
-                                            employee: employee,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ListTile(
+                                  title: Text('${index + 1},  ${employee.name}',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                  subtitle: Text(
+                                      'Emp ID: ${employee.empId}\nAadhar Card: ${employee.aadharCard} | Mobile Number: ${employee.mobileNumber}\n\nShift:\n${_shiftClockIn(employee.shift)}\n${_shiftClockOut(employee.shift)}\n\nAddress: ${employee.address}\nAccount Number: ${employee.accountNumber} | Site Name: ${employee.siteName}\nClock In: ${_clockInTime(employee)} | Clock Out: ${_clockOutTime(employee)}',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        margin: const EdgeInsets.all(8),
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                .45,
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            color: Colors.amberAccent),
+                                        child: InkWell(
+                                          onTap: () => editEmployee(employee),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                "Edit",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                              ),
+                                              IconButton(
+                                                  onPressed: () =>
+                                                      editEmployee(employee),
+                                                  icon: Icon(
+                                                    Icons.edit,
+                                                    color: Colors.black,
+                                                  ))
+                                            ],
                                           ),
-                                        ));
-                                        if (result is bool && result == true) {
-                                          Apis.employees().then((value) {
-                                            if (value != null) {
-                                              setState(() {
-                                                employees = value;
-                                              });
-                                            }
-                                          });
-                                        }
-                                      },
-                                      icon: Icon(
-                                        Icons.edit,
-                                        color: Colors.black,
-                                      )),
-                                  IconButton(
-                                      onPressed: () {
-                                        deleteEmployee(employee);
-                                      },
-                                      icon: Icon(
-                                        Icons.delete,
-                                        color: Colors.redAccent,
-                                      )),
-
-                                ],
-                              ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        margin: EdgeInsets.all(8),
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                .45,
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            color: Colors.redAccent),
+                                        child: InkWell(
+                                          onTap: () => deleteEmployee(employee),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                "Delete",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                              ),
+                                              IconButton(
+                                                  onPressed: () {
+                                                    deleteEmployee(employee);
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.delete,
+                                                    color: Colors.white,
+                                                  ))
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
                             ));
                       },
                     )
@@ -164,6 +212,23 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
         ),
       ),
     );
+  }
+
+  void editEmployee(Employee employee) async {
+    var result = await Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => UpdateEmployeeForm(
+        employee: employee,
+      ),
+    ));
+    if (result is bool && result == true) {
+      Apis.employees().then((value) {
+        if (value != null) {
+          setState(() {
+            employees = value;
+          });
+        }
+      });
+    }
   }
 
   // Custom input field with ShadCN UI style

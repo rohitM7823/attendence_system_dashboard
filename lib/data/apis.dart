@@ -6,7 +6,53 @@ import 'package:attendence_system_dashboard/models/employee.dart';
 import 'package:http/http.dart' as http;
 
 class Apis {
-  static const BASE_URL = 'http://192.168.0.34:8000/api';
+  static const BASE_URL = 'http://192.168.0.5:8000/api';
+
+  static Future<String?> login(String userId, String password) async {
+    try {
+      //log({'user_id': userId, 'password': password}.toString(), name: 'BODY');
+      final response = await http.post(Uri.parse('$BASE_URL/admin/login'),
+          body: {'admin_id': userId, 'password': password});
+
+      //log(response.statusCode.toString(), name: 'LOGIN');
+      if (response.statusCode == 200) {
+        //log(json.decode(response.body)['token'] as String, name: 'LOGIN');
+        return json.decode(response.body)['token'] as String?;
+      }
+      return null;
+    } catch (ex) {
+      rethrow;
+    }
+  }
+
+  static Future<bool> logout(String token) async {
+    try {
+      final response = await http.post(Uri.parse('$BASE_URL/admin/logout'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token'
+          });
+      log('${response.statusCode}', name: 'LOGOUT');
+      return response.statusCode == 200;
+    } catch (ex) {
+      rethrow;
+    }
+  }
+
+  static Future<bool> forgotPassword(String adminId, String newPassword) async {
+    try {
+      final response =
+          await http.post(Uri.parse('$BASE_URL/admin/forgot-password'), body: {
+        'admin_id': adminId,
+        'new_password': newPassword
+      });
+
+      log(response.body.toString(), name: 'FORGOT_PASSWORD');
+      return response.statusCode == 200;
+    } catch (ex) {
+      rethrow;
+    }
+  }
 
   static Future<List<Device>?> registeredDevices() async {
     try {
@@ -178,10 +224,9 @@ class Apis {
 
   static Future<bool?> deleteEmployee(int? id) async {
     try {
-      final response =
-          await http.delete(Uri.parse('$BASE_URL/employee/$id/delete'), headers: {
-            'platform': 'web'
-          });
+      final response = await http.delete(
+          Uri.parse('$BASE_URL/employee/$id/delete'),
+          headers: {'platform': 'web'});
       if (response.statusCode == 200) {
         return true;
       }
