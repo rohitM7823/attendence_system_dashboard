@@ -1,7 +1,12 @@
 import 'package:attendence_system_dashboard/data/apis.dart';
+import 'package:attendence_system_dashboard/models/employee.dart';
 import 'package:flutter/material.dart';
 
 class AddSitePage extends StatefulWidget {
+  const AddSitePage({super.key, this.site});
+
+  final Map<String, dynamic>? site;
+
   @override
   _AddSitePageState createState() => _AddSitePageState();
 }
@@ -12,36 +17,94 @@ class _AddSitePageState extends State<AddSitePage> {
   final _latController = TextEditingController();
   final _lngController = TextEditingController();
   final _radiusController = TextEditingController();
-
   bool _isSubmitting = false;
+  bool isEditing = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    setState(() {
+      isEditing = widget.site != null;
+    });
+    if (widget.site != null) {
+      _siteNameController.text = widget.site!['name'];
+      _latController.text = widget.site!['location']['lat'].toString();
+      _lngController.text = widget.site!['location']['lng'].toString();
+      _radiusController.text = widget.site!['radius'].toString();
+    }
+  }
 
   void _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSubmitting = true);
 
-    await Apis.addSite({
-      'name': _siteNameController.text,
-      'location': {
-        'lat': double.parse(_latController.text),
-        'lng': double.parse(_lngController.text)
-      },
-      'radius': int.parse(_radiusController.text),
-    }).then(
-      (value) {
-        if (value == true) {
-          showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-              title: Text("Submitted"),
-              content: Text("✔ Site: ${_siteNameController.text}\n"
-                  "✔ Lat: ${_latController.text}, Lng: ${_lngController.text}\n"
-                  "✔ Radius: ${_radiusController.text} m"),
-            ),
-          );
-        }
-      },
-    );
+    if (isEditing) {
+      await Apis.updateSite(Site(
+              id: widget.site!['id'],
+              name: _siteNameController.text,
+              location: Location(
+                  lat: double.parse(_latController.text),
+                  lng: double.parse(_lngController.text)),
+              radius: int.parse(_radiusController.text)))
+          .then(
+        (value) async {
+          if (value == true) {
+             final result = await showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: const Text("Site Updated!"),
+                content: Text("✔ Site: ${_siteNameController.text}\n"
+                    "✔ Lat: ${_latController.text}, Lng: ${_lngController.text}\n"
+                    "✔ Radius: ${_radiusController.text} m"),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                      child: const Text('Close'))
+                ],
+              ),
+             );
+             if(result is bool && result) {
+               Navigator.of(context).pop(result);
+             }
+          }
+        },
+      );
+    } else {
+      await Apis.addSite({
+        'name': _siteNameController.text,
+        'location': {
+          'lat': double.parse(_latController.text),
+          'lng': double.parse(_lngController.text)
+        },
+        'radius': int.parse(_radiusController.text),
+      }).then(
+        (value) {
+          if (value == true) {
+            showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: Text("Submitted"),
+                content: Text("✔ Site: ${_siteNameController.text}\n"
+                    "✔ Lat: ${_latController.text}, Lng: ${_lngController.text}\n"
+                    "✔ Radius: ${_radiusController.text} m"),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pop(true);
+                      },
+                      child: const Text('Close'))
+                ],
+              ),
+            );
+          }
+        },
+      );
+    }
 
     setState(() => _isSubmitting = false);
   }
@@ -184,7 +247,7 @@ class _AddSitePageState extends State<AddSitePage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.indigo,
                           foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 18),
+                          padding: const EdgeInsets.symmetric(vertical: 18),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -192,7 +255,7 @@ class _AddSitePageState extends State<AddSitePage> {
                           disabledForegroundColor: Colors.grey.shade700,
                         ),
                         child: _isSubmitting
-                            ? SizedBox(
+                            ? const SizedBox(
                                 width: 18,
                                 height: 18,
                                 child: CircularProgressIndicator(
@@ -200,7 +263,8 @@ class _AddSitePageState extends State<AddSitePage> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : Text('Submit', style: TextStyle(fontSize: 16)),
+                            : const Text('Submit',
+                                style: TextStyle(fontSize: 16)),
                       ),
                     )
                   ],

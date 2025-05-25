@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:attendence_system_dashboard/models/department.dart';
 import 'package:attendence_system_dashboard/models/device.dart';
 import 'package:attendence_system_dashboard/models/employee.dart';
 import 'package:http/http.dart' as http;
 
 class Apis {
-  static const BASE_URL = 'http://192.168.0.5:8000/api';
+  static const BASE_URL = 'https://gsa.ezonedigital.com/api'; //'http://192.168.0.2:8000/api';
 
   static Future<String?> login(String userId, String password) async {
     try {
@@ -41,11 +42,9 @@ class Apis {
 
   static Future<bool> forgotPassword(String adminId, String newPassword) async {
     try {
-      final response =
-          await http.post(Uri.parse('$BASE_URL/admin/forgot-password'), body: {
-        'admin_id': adminId,
-        'new_password': newPassword
-      });
+      final response = await http.post(
+          Uri.parse('$BASE_URL/admin/forgot-password'),
+          body: {'admin_id': adminId, 'new_password': newPassword});
 
       log(response.body.toString(), name: 'FORGOT_PASSWORD');
       return response.statusCode == 200;
@@ -120,10 +119,12 @@ class Apis {
     }
   }
 
-  static Future<List<Employee>?> employees() async {
+  static Future<List<Employee>?> employees(
+      {String search = '', int? page = 1, int limit = 10}) async {
     try {
       final response = await http.get(
-        Uri.parse('$BASE_URL/employee/all'),
+        Uri.parse(
+            '$BASE_URL/employee/all?search=$search&page=$page&limit=$limit'),
       );
       if (response.statusCode == 200) {
         return List<Employee>.from(json
@@ -163,6 +164,7 @@ class Apis {
             'Content-Type': 'application/json',
           },
           body: jsonEncode(data));
+      log('${response.body}', name: 'ADD_SHIFT');
       return true;
     } catch (ex) {
       log(ex.toString(), name: 'ADD_SHIFT_ISSUE');
@@ -175,6 +177,7 @@ class Apis {
       final response = await http.get(
         Uri.parse('$BASE_URL/shifts'),
       );
+      log('${response.body}', name: 'SHIFTS');
       if (response.statusCode == 200) {
         return List<Shift>.from(json
             .decode(response.body)['shifts']!
@@ -187,9 +190,10 @@ class Apis {
     }
   }
 
-  static Future<List<Site>?> availableSties() async {
+  static Future<List<Site>?> availableSties({String search = ''}) async {
     try {
-      final response = await http.get(Uri.parse('$BASE_URL/sites'), headers: {
+      final response =
+          await http.get(Uri.parse('$BASE_URL/sites?search=$search'), headers: {
         'platform': 'web',
       });
       return List.from(
@@ -222,6 +226,28 @@ class Apis {
     }
   }
 
+  static Future<bool?> updateSite(Site site) async {
+    try {
+      final response = await http.put(Uri.parse('$BASE_URL/site/${site.id}'),
+          headers: {
+            'platform': 'web',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode(site.toJson()));
+      log("${response.statusCode}", name: 'ÚPDATE_SITE');
+      if (response.statusCode == 200) {
+        log("${jsonDecode(response.body)['status'] as bool?}",
+            name: 'ÚPDATE_SITE');
+        return jsonDecode(response.body)['status'] as bool?;
+      }
+      return null;
+    } catch (ex) {
+      log(ex.toString(), name: 'UPDATE_SITE_ISSUE');
+      return null;
+    }
+  }
+
   static Future<bool?> deleteEmployee(int? id) async {
     try {
       final response = await http.delete(
@@ -234,6 +260,88 @@ class Apis {
     } catch (ex) {
       log(ex.toString(), name: 'DELETE_EMPLOYEE_ISSUE');
       return null;
+    }
+  }
+
+  static Future<bool?> deleteSite(String siteId) async {
+    try {
+      final response = await http.delete(Uri.parse('$BASE_URL/site/$siteId'),
+          headers: {'platform': 'web'});
+      if (response.statusCode == 200) {
+        return true;
+      }
+      return null;
+    } catch (ex) {
+      log(ex.toString(), name: 'DELETE_SITE_ISSUE');
+      return null;
+    }
+  }
+
+  static Future<bool> addDepartment(String name) async {
+    try {
+      final response = await http.post(Uri.parse('$BASE_URL/departments/add'),
+          body: jsonEncode({'name': name}),
+          headers: {
+            'platform': 'web',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          });
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)['department'] != null;
+      }
+      return false;
+    } catch (ex) {
+      log(ex.toString(), name: 'ADD_DEPARTMENT_ISSUE');
+      return false;
+    }
+  }
+
+  static Future<List<Department>> departments() async {
+    try {
+      final response = await http.get(Uri.parse('$BASE_URL/departments'));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)['departments']
+            .map<Department>((e) => Department.fromJson(e))
+            .toList();
+      }
+      return [];
+    } catch (ex) {
+      log(ex.toString(), name: 'DEPARTMENTS_ISSUE');
+      return [];
+    }
+  }
+
+  static Future<bool> deleteDepartment(int id) async {
+    try {
+      final response =
+          await http.delete(Uri.parse('$BASE_URL/departments/$id'));
+      if (response.statusCode == 200) {
+        return true;
+      }
+      return false;
+    } catch (ex) {
+      log(ex.toString(), name: 'DELETE_DEPARTMENT_ISSUE');
+      return false;
+    }
+  }
+
+  static Future<bool> updateDepartment(Department department) async {
+    try {
+      final response =
+          await http.put(Uri.parse('$BASE_URL/departments/${department.id}'),
+              headers: {
+                'platform': 'web',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+              },
+              body: jsonEncode(department.toJson()));
+      if (response.statusCode == 200) {
+        return true;
+      }
+      return false;
+    } catch (ex) {
+      log(ex.toString(), name: 'UPDATE_DEPARTMENT_ISSUE');
+      return false;
     }
   }
 }

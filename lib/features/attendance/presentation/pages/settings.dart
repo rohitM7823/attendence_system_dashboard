@@ -13,11 +13,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  List<Shift> _clockIns = [
-    Shift(),
-    Shift(),
-    Shift()
-  ];
+  List<Shift> _clockIns = [];
 
   @override
   void initState() {
@@ -101,7 +97,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                    clockIn.clockIn != null ? _format(clockIn.clockIn!.toTimeOfDay) : '--:--',
+                  clockIn.clockIn != null
+                      ? _format(clockIn.clockIn!.toTimeOfDay)
+                      : '--:--',
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
@@ -129,11 +127,14 @@ class _SettingsPageState extends State<SettingsPage> {
           Text(label,
               style: TextStyle(fontSize: 14, color: Colors.grey.shade800)),
           Text(value,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              style:
+                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
         ],
       ),
     );
   }
+
+  bool saveLoading = false;
 
   void _saveSettings() async {
     final allSet = _clockIns.every((time) => time.clockIn != null);
@@ -144,14 +145,20 @@ class _SettingsPageState extends State<SettingsPage> {
       return;
     }
 
+    setState(() {
+      saveLoading = true;
+    });
     for (var time in _clockIns) {
-      log('index: ${_clockIns.indexOf(time)} clockIn: ${time.clockIn?.toTimeOfDay}', name: 'SettingsPage');
+      log('index: ${_clockIns.indexOf(time) + 1} clockIn: ${time.clockIn?.toTimeOfDay}',
+          name: 'SettingsPage');
       await Apis.addShift({
-        'id': _clockIns.indexOf(time)+1,
+        'id': time.id,
         'clock_in': time.clockIn?.toIso8601String(),
       });
     }
-
+    setState(() {
+      saveLoading = false;
+    });
     // Handle saving logic here (e.g., save to Firestore or shared preferences)
     showDialog(
       context: context,
@@ -165,20 +172,42 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Configure Shifts",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 24),
-            ...List.generate(3, (index) => _buildShiftCard(index)),
-            const SizedBox(height: 24),
-            SizedBox(
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Current Shifts",
+                          style: TextStyle(
+                              fontSize: 22, fontWeight: FontWeight.bold)),
+                      InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: _addMoreShift,
+                          child: Row(children: [
+                            Icon(Icons.add),
+                            Text('Add More Shift')
+                          ]))
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  ...List.generate(_clockIns.length, (index) => _buildShiftCard(index)).reversed,
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _saveSettings,
+                onPressed: saveLoading ? null : _saveSettings,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.indigo,
                   foregroundColor: Colors.white,
@@ -187,12 +216,19 @@ class _SettingsPageState extends State<SettingsPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text("Save Settings", style: TextStyle(fontSize: 16)),
+                child: Text("${saveLoading ? "Saving" : "Save"} Settings",
+                    style: TextStyle(fontSize: 16)),
               ),
-            )
-          ],
-        ),
+            ),
+          )
+        ],
       ),
     );
+  }
+
+  void _addMoreShift() {
+    setState(() {
+      _clockIns.add(Shift());
+    });
   }
 }

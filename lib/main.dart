@@ -1,9 +1,8 @@
-import 'dart:developer';
-
 import 'package:attendence_system_dashboard/core/helpers/storage_helper.dart';
 import 'package:attendence_system_dashboard/data/apis.dart';
-import 'package:attendence_system_dashboard/features/attendance/presentation/pages/add_stite_page.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/admin_login.dart';
+import 'package:attendence_system_dashboard/features/attendance/presentation/pages/all_sites_page.dart';
+import 'package:attendence_system_dashboard/features/attendance/presentation/pages/deparment_management_page.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/employee_management_page.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/entry_screen.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/settings.dart';
@@ -55,14 +54,16 @@ class _AdminHomePageState extends State<AdminHomePage> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    AddSitePage(),
+    const AllSitesPage(), //AddSitePage(),
     const EmployeeManagementPage(),
+    const DepartmentManagementPage(),
     const SettingsPage(),
   ];
 
   final List<String> _titles = [
-    'Manage Site',
+    'Manage Sites',
     'Manage Employees',
+    'Manage Department',
     'Configure shifts',
   ];
 
@@ -152,22 +153,28 @@ class _AdminHomePageState extends State<AdminHomePage> {
               decoration: BoxDecoration(color: Colors.blue),
             ),
             ListTile(
-              title: Text('Add Your Site'),
+              title: Text(_titles[0]),
               onTap: () => _onItemTapped(0),
               selected: _selectedIndex == 0,
               tileColor: _selectedIndex == 0 ? Colors.blue.shade100 : null,
             ),
             ListTile(
-              title: const Text('Manage Employees'),
+              title: Text(_titles[1]),
               onTap: () => _onItemTapped(1),
               selected: _selectedIndex == 1,
               tileColor: _selectedIndex == 1 ? Colors.blue.shade100 : null,
             ),
             ListTile(
-                title: Text('Settings'),
-                onTap: () => _onItemTapped(2),
-                selected: _selectedIndex == 2,
-                tileColor: _selectedIndex == 2 ? Colors.blue.shade100 : null),
+              title: Text(_titles[2]),
+              onTap: () => _onItemTapped(2),
+              selected: _selectedIndex == 2,
+              tileColor: _selectedIndex == 2 ? Colors.blue.shade100 : null,
+            ),
+            ListTile(
+                title: Text(_titles[3]),
+                onTap: () => _onItemTapped(3),
+                selected: _selectedIndex == 3,
+                tileColor: _selectedIndex == 3 ? Colors.blue.shade100 : null),
           ],
         ),
       ),
