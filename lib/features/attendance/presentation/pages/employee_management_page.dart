@@ -6,6 +6,7 @@ import 'package:attendence_system_dashboard/models/device.dart';
 import 'package:attendence_system_dashboard/models/employee.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class EmployeeManagementPage extends StatefulWidget {
   final Device? preselectedDevice;
@@ -127,6 +128,60 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
     }
   }
 
+  DateTimeRange? selectedDateRange;
+
+  String get dateRangeText {
+    if (selectedDateRange == null) return 'Select Date Range';
+    final format = DateFormat('dd MMM');
+    return '${format.format(selectedDateRange!.start)} - ${format.format(selectedDateRange!.end)}';
+  }
+
+  Future<DateTimeRange?> _selectDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+      initialDateRange: selectedDateRange,
+    );
+
+    if (picked != null) {
+      selectedDateRange = picked;
+      return picked;
+    }
+    return null;
+  }
+
+  bool reportDownloadLoader = false;
+
+  void _onDownloadReport() async {
+    await _selectDateRange().then(
+      (selectedDateRange) async {
+        if (selectedDateRange != null) {
+          if (reportDownloadLoader) {
+            return;
+          }
+
+          setState(() {
+            reportDownloadLoader = true;
+          });
+          final result = await Apis.downloadReport(
+              selectedDateRange.start, selectedDateRange.end);
+          setState(() {
+            reportDownloadLoader = false;
+          });
+          if (result != null) {
+            await launchUrlString(result);
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text('Attendance Report Downloaded Successfully')));
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text('Attendance Report Unable to Downloaded!')));
+          }
+        }
+      },
+    );
+  }
+
   Widget _buildSearchBar() {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -196,7 +251,8 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
           Text('Department: ${emp.department?.name ?? 'N/A'}'),
           const Divider(),
           Text("Clock In: ${_formatDate(emp.clockInTime)}"),
-          Text("Clock Out: ${_formatDate(emp.clockOutTime)}"),
+          Text(
+              "Clock Out: ${_formatDate(emp.clockOutTime)} - (${emp.clockOutTime == null ? 'Absent' : 'Present'})"),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -244,6 +300,12 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
               leading: BackButton(color: Colors.black),
             )
           : null,
+      floatingActionButton: FloatingActionButton(
+        onPressed: reportDownloadLoader ? null : _onDownloadReport,
+        tooltip:
+            reportDownloadLoader ? "Downloading Report" : "Download Report",
+        child: Icon(reportDownloadLoader ? Icons.downloading : Icons.download),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

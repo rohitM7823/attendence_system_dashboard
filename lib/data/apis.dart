@@ -5,9 +5,11 @@ import 'package:attendence_system_dashboard/models/department.dart';
 import 'package:attendence_system_dashboard/models/device.dart';
 import 'package:attendence_system_dashboard/models/employee.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class Apis {
-  static const BASE_URL = 'https://gsa.ezonedigital.com/api'; //'http://192.168.0.2:8000/api';
+  static const BASE_URL = 'https://gsa.ezonedigital.com/api';
+  //static const BASE_URL = 'http://192.168.0.2:8000/api';
 
   static Future<String?> login(String userId, String password) async {
     try {
@@ -342,6 +344,27 @@ class Apis {
     } catch (ex) {
       log(ex.toString(), name: 'UPDATE_DEPARTMENT_ISSUE');
       return false;
+    }
+  }
+
+  static Future<String?> downloadReport(DateTime from, DateTime to) async {
+    try {
+      final response = await http.post(
+          Uri.parse('$BASE_URL/employee/attendance-report-pdf'),
+          headers: {
+            'platform': 'web',
+          },
+          body: {
+            'start_date': DateFormat('yyyy-MM-dd').format(from),
+            'end_date': DateFormat('yyyy-MM-dd').format(to)
+          });
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)['download_url'] as String?;
+      }
+      return null;
+    } catch (ex) {
+      log(ex.toString(), name: 'DOWNLOAD_REPORT_ISSUE');
+      return null;
     }
   }
 }
