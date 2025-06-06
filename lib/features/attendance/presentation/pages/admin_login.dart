@@ -45,7 +45,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
           await prefs.setAdminToken(value!);
           log('${await prefs.getAdminToken()}', name: 'LOGIN');
           _showSnackbar("Login successful");
-          Navigator.pushReplacementNamed(context, Routes.dashboard);
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            Routes.dashboard,
+            (route) => false,
+          );
         } else {
           _showSnackbar("Invalid credentials", error: true);
         }
@@ -165,8 +169,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                         setState(() => isChanging = true);
                         await Apis.forgotPassword(adminIdController.text,
                                 confirmPasswordController.text)
-                            .then((value) {
-                          setState(() => isChanging = false);
+                            .then(
+                          (value) {
+                            setState(() => isChanging = false);
                             if (value) {
                               _showSnackbar("Password reset successfully");
                               Navigator.pop(context);

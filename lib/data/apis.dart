@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 
 class Apis {
   static const BASE_URL = 'https://gsa.ezonedigital.com/api';
-  //static const BASE_URL = 'http://192.168.0.2:8000/api';
+  //static const BASE_URL = 'http://192.168.0.6:8000/api';
 
   static Future<String?> login(String userId, String password) async {
     try {
