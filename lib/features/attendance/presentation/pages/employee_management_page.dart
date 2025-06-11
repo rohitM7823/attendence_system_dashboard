@@ -252,7 +252,7 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
           const Divider(),
           Text("Clock In: ${_formatDate(emp.clockInTime)}"),
           Text(
-              "Clock Out: ${_formatDate(emp.clockOutTime)} - (${emp.clockOutTime == null ? 'Absent' : 'Present'})"),
+              "Clock Out: ${_formatDate(emp.clockOutTime)} - (${_checkIfPresent(emp) ? 'Present' : 'Absent'})"),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -331,5 +331,9 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
         ),
       ),
     );
+  }
+
+  bool _checkIfPresent(Employee emp) {
+    return emp.clockInTime != null && emp.clockOutTime != null;
   }
 }
