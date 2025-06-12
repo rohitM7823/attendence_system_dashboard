@@ -102,7 +102,7 @@ class _AllSitesPageState extends State<AllSitesPage> {
           ),
           icon: const Icon(Icons.add),
         ),
-
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         body: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(

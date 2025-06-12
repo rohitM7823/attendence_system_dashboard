@@ -334,6 +334,16 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
   }
 
   bool _checkIfPresent(Employee emp) {
-    return emp.clockInTime != null && emp.clockOutTime != null;
+    final clockInWindow = emp.shift?.clockInWindow;
+    final clockOutWindow = emp.shift?.clockOutWindow;
+    final condition = emp.clockInTime != null && (clockInWindow?.start != null &&
+        clockInWindow!.start!.isBefore(emp.clockInTime!) &&
+        clockInWindow.end != null &&
+        clockInWindow.end!.isAfter(emp.clockInTime!));
+    final condition2 = emp.clockOutTime != null && (clockOutWindow?.start != null &&
+        clockOutWindow!.start!.isBefore(emp.clockOutTime!) &&
+        clockOutWindow.end != null &&
+        clockOutWindow.end!.isAfter(emp.clockOutTime!));
+    return condition && condition2;
   }
 }
