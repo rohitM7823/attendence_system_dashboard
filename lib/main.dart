@@ -2,10 +2,11 @@ import 'package:attendence_system_dashboard/core/helpers/storage_helper.dart';
 import 'package:attendence_system_dashboard/data/apis.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/admin_login.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/all_sites_page.dart';
+import 'package:attendence_system_dashboard/features/attendance/presentation/pages/configure_shifts.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/deparment_management_page.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/employee_management_page.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/entry_screen.dart';
-import 'package:attendence_system_dashboard/features/attendance/presentation/pages/settings.dart';
+import 'package:attendence_system_dashboard/features/attendance/presentation/pages/settings_page.dart';
 import 'package:flutter/material.dart';
 
 import 'routes/app_router.dart';
@@ -53,18 +54,20 @@ class AdminHomePage extends StatefulWidget {
 class _AdminHomePageState extends State<AdminHomePage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
-    const AllSitesPage(), //AddSitePage(),
-    const EmployeeManagementPage(),
-    const DepartmentManagementPage(),
-    const SettingsPage(),
-  ];
+  List<Widget> get _pages => [
+        const AllSitesPage(), //AddSitePage(),
+        const EmployeeManagementPage(),
+        const DepartmentManagementPage(),
+        const ConfigureShiftsPage(),
+        SettingsPage(logout: () => _logout())
+      ];
 
   final List<String> _titles = [
     'Manage Sites',
     'Manage Employees',
     'Manage Department',
     'Configure shifts',
+    'Settings'
   ];
 
   void _onItemTapped(int index) {
@@ -175,6 +178,12 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 onTap: () => _onItemTapped(3),
                 selected: _selectedIndex == 3,
                 tileColor: _selectedIndex == 3 ? Colors.blue.shade100 : null),
+            ListTile(
+              title: Text(_titles[4]),
+              onTap: () => _onItemTapped(4),
+              selected: _selectedIndex == 4,
+              tileColor: _selectedIndex == 4 ? Colors.blue.shade100 : null,
+            )
           ],
         ),
       ),

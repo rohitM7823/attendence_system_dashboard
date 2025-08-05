@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:attendence_system_dashboard/data/apis.dart';
+import 'package:attendence_system_dashboard/features/attendance/presentation/pages/attendence_report.dart';
 import 'package:attendence_system_dashboard/features/attendance/presentation/pages/edit_employee.dart';
 import 'package:attendence_system_dashboard/models/device.dart';
 import 'package:attendence_system_dashboard/models/employee.dart';
@@ -139,7 +140,7 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
   Future<DateTimeRange?> _selectDateRange() async {
     final picked = await showDateRangePicker(
       context: context,
-      firstDate: DateTime.now(),
+      firstDate: DateTime(2025),
       lastDate: DateTime(2100),
       initialDateRange: selectedDateRange,
     );
@@ -153,34 +154,35 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
 
   bool reportDownloadLoader = false;
 
-  void _onDownloadReport() async {
-    await _selectDateRange().then(
-      (selectedDateRange) async {
-        if (selectedDateRange != null) {
-          if (reportDownloadLoader) {
-            return;
-          }
-
-          setState(() {
-            reportDownloadLoader = true;
-          });
-          final result = await Apis.downloadReport(
-              selectedDateRange.start, selectedDateRange.end);
-          setState(() {
-            reportDownloadLoader = false;
-          });
-          if (result != null) {
-            await launchUrlString(result);
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text('Attendance Report Downloaded Successfully')));
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text('Attendance Report Unable to Downloaded!')));
-          }
-        }
-      },
-    );
-  }
+  // void _onDownloadReport() async {
+  //   await _selectDateRange().then(
+  //     (selectedDateRange) async {
+  //       if (selectedDateRange != null) {
+  //         if (reportDownloadLoader) {
+  //           return;
+  //         }
+  //
+  //         setState(() {
+  //           reportDownloadLoader = true;
+  //         });
+  //         var result = await Apis.downloadReport(
+  //             selectedDateRange.start, selectedDateRange.end);
+  //         setState(() {
+  //           reportDownloadLoader = false;
+  //         });
+  //         if (result != null) {
+  //           result = result.replaceAll('storage/', 'storage/app/public/');
+  //           await launchUrlString(result);
+  //           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //               content: Text('Attendance Report Downloaded Successfully')));
+  //         } else {
+  //           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //               content: Text('Attendance Report Unable to Downloaded!')));
+  //         }
+  //       }
+  //     },
+  //   );
+  // }
 
   Widget _buildSearchBar() {
     return Container(
@@ -300,12 +302,20 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
               leading: BackButton(color: Colors.black),
             )
           : null,
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => const AttendanceReportScreen()));
+        },
+        label: Text('View Attendence'),
+        icon: Icon(Icons.co_present),
+      ) /*FloatingActionButton(
         onPressed: reportDownloadLoader ? null : _onDownloadReport,
         tooltip:
             reportDownloadLoader ? "Downloading Report" : "Download Report",
         child: Icon(reportDownloadLoader ? Icons.downloading : Icons.download),
-      ),
+      )*/
+      ,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -336,14 +346,16 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
   bool _checkIfPresent(Employee emp) {
     final clockInWindow = emp.shift?.clockInWindow;
     final clockOutWindow = emp.shift?.clockOutWindow;
-    final condition = emp.clockInTime != null && (clockInWindow?.start != null &&
-        clockInWindow!.start!.isBefore(emp.clockInTime!) &&
-        clockInWindow.end != null &&
-        clockInWindow.end!.isAfter(emp.clockInTime!));
-    final condition2 = emp.clockOutTime != null && (clockOutWindow?.start != null &&
-        clockOutWindow!.start!.isBefore(emp.clockOutTime!) &&
-        clockOutWindow.end != null &&
-        clockOutWindow.end!.isAfter(emp.clockOutTime!));
+    final condition = emp.clockInTime != null &&
+        (clockInWindow?.start != null &&
+            clockInWindow!.start!.isBefore(emp.clockInTime!) &&
+            clockInWindow.end != null &&
+            clockInWindow.end!.isAfter(emp.clockInTime!));
+    final condition2 = emp.clockOutTime != null &&
+        (clockOutWindow?.start != null &&
+            clockOutWindow!.start!.isBefore(emp.clockOutTime!) &&
+            clockOutWindow.end != null &&
+            clockOutWindow.end!.isAfter(emp.clockOutTime!));
     return condition && condition2;
   }
 }

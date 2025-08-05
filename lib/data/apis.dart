@@ -4,12 +4,13 @@ import 'dart:developer';
 import 'package:attendence_system_dashboard/models/department.dart';
 import 'package:attendence_system_dashboard/models/device.dart';
 import 'package:attendence_system_dashboard/models/employee.dart';
+import 'package:attendence_system_dashboard/models/monthly_attendance_report.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class Apis {
   static const BASE_URL = 'https://gsa.ezonedigital.com/api';
-  // static const BASE_URL = 'http://192.168.0.2:8000/api';
+  // static const BASE_URL = 'http://localhost:8000/api';
 
   static Future<String?> login(String userId, String password) async {
     try {
@@ -347,24 +348,80 @@ class Apis {
     }
   }
 
-  static Future<String?> downloadReport(DateTime from, DateTime to) async {
+  static Future<String?> downloadReport({
+    required String month,
+    required String siteName,
+    required int departmentId,
+  }) async {
     try {
       final response = await http.post(
-          Uri.parse('$BASE_URL/employee/attendance-report-pdf'),
-          headers: {
-            'platform': 'web',
-          },
-          body: {
-            'start_date': DateFormat('yyyy-MM-dd').format(from),
-            'end_date': DateFormat('yyyy-MM-dd').format(to)
-          });
+        Uri.parse('$BASE_URL/employee/attendance-report-pdf'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'month': month,
+          'site_name': siteName,
+          'department_id': departmentId,
+        }),
+      );
       if (response.statusCode == 200) {
-        return jsonDecode(response.body)['download_url'] as String?;
+        return json.decode(response.body)['download_url'] as String?;
       }
       return null;
     } catch (ex) {
-      log(ex.toString(), name: 'DOWNLOAD_REPORT_ISSUE');
+      log(ex.toString(), name: 'DOWNLOAD_REPORT_ERROR');
       return null;
     }
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchAttendanceReport({int? siteId, int? departmentId, required int month, required int year}) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$BASE_URL/attendance-report?site_id=$siteId&department_id=$departmentId&month=$month&year=$year'),
+        headers: {'platform': 'web'},
+      );
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(
+            json.decode(response.body)['attendance_report']);
+      }
+      return [];
+    } catch (ex) {
+      log(ex.toString(), name: 'FETCH_ATTENDANCE_REPORT_ISSUE');
+      return [];
+    }
+  }
+
+  static Future<MonthlyAttendanceReport?> getMonthlyAttendanceReport({
+    required String month,
+    required String siteName,
+    required int departmentId,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$BASE_URL/employees/monthly-attendance-report'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'month': month,
+          'site_name': siteName,
+          'department_id': departmentId,
+          'page': page,
+          'limit': limit,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return MonthlyAttendanceReport.fromJson(data);
+      }
+    } catch (ex) {
+      log(ex.toString(), name: 'MONTHLY_ATTENDANCE_REPORT_ERROR');
+      return null;
+    }
+    return null;
   }
 }

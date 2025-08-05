@@ -5,14 +5,14 @@ import 'package:attendence_system_dashboard/data/apis.dart';
 import 'package:attendence_system_dashboard/models/employee.dart';
 import 'package:flutter/material.dart';
 
-class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+class ConfigureShiftsPage extends StatefulWidget {
+  const ConfigureShiftsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  State<ConfigureShiftsPage> createState() => _ConfigureShiftsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _ConfigureShiftsPageState extends State<ConfigureShiftsPage> {
   List<Shift> _clockIns = [];
 
   @override
